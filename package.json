@@ -7,6 +7,7 @@
   "scripts": {
     "start": "vite",
     "build:react": "vite build",
+    "postinstall": "electron-builder install-app-deps",
     "build": "vite build && electron-builder --win portable"
   },
   "build": {
