@@ -22,8 +22,8 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Build Windows Executable (.exe)
-        run: npx electron-builder --win nsis
+      - name: Build Desktop Executable (.exe)
+        run: npm run build
 
       - name: Upload Installer Executable
         uses: actions/upload-artifact@v3
