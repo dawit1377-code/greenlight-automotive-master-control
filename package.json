@@ -7,18 +7,15 @@
   "scripts": {
     "start": "vite",
     "build:react": "vite build",
-    "build": "vite build && electron-builder --win nsis"
+    "build": "vite build && electron-builder --win portable"
   },
   "build": {
     "appId": "com.glac.mastercontrol",
     "productName": "GLAC Master Control",
     "npmRebuild": false,
+    "asar": true,
     "win": {
-      "target": "nsis"
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "target": "portable"
     },
     "directories": {
       "output": "dist-electron"
