@@ -16,13 +16,16 @@
     "win": {
       "target": "nsis"
     },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
     "directories": {
-      "output": "dist-installer"
+      "output": "dist-electron"
     },
     "files": [
       "dist/**/*",
-      "main.js",
-      "db/**/*"
+      "main.js"
     ]
   },
   "dependencies": {
@@ -31,8 +34,8 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",
-    "electron": "^28.0.0",
-    "electron-builder": "^24.0.0",
+    "electron": "^28.2.0",
+    "electron-builder": "^24.9.0",
     "vite": "^5.0.0"
   }
 }
