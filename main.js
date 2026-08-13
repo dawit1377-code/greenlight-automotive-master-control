@@ -51,7 +51,7 @@ function createWindow() {
   if (isDev) {
     mainWindow.loadURL('http://localhost:3000');
   } else {
-    mainWindow.loadFile(path.join(__dirname, 'build', 'index.html'));
+   mainWindow.loadFile(path.join(__dirname, 'dist', 'index.html'));
   }
 
   // Remove default menu bar for clean enterprise desktop look
