@@ -25,7 +25,7 @@ jobs:
       - name: Build Executable App (.exe)
         run: npm run build
 
-      - name: Upload Executable Artifact
+      - name: Upload Executable Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: GLAC-Master-Control-Windows
