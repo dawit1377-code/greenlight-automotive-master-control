@@ -22,7 +22,7 @@ jobs:
       - name: Install Dependencies
         run: npm install --legacy-peer-deps
 
-      - name: Build Executable App (.exe)
+      - name: Build Executable Apps (.exe)
         run: npm run build
 
       - name: Upload Executable Artifacts
