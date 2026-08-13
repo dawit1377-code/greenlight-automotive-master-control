@@ -8,7 +8,7 @@
     "start": "vite",
     "build:react": "vite build",
     "postinstall": "electron-builder install-app-deps",
-    "build": "vite build && electron-builder --win portable"
+    "build": "vite build && electron-builder --win portable --ia32 --x64"
   },
   "build": {
     "appId": "com.glac.mastercontrol",
@@ -16,7 +16,11 @@
     "npmRebuild": false,
     "asar": true,
     "win": {
-      "target": "portable"
+      "target": "portable",
+      "arch": [
+        "ia32",
+        "x64"
+      ]
     },
     "directories": {
       "output": "dist-electron"
