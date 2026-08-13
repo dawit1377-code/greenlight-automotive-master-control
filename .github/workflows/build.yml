@@ -29,4 +29,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: GLAC-Master-Control-Setup
-          path: dist-installer/*.exe
+          path: dist-electron/*.exe
+          if-no-files-found: warn
