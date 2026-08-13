@@ -6,16 +6,18 @@
   "private": true,
   "scripts": {
     "start": "vite",
+    "build:react": "vite build",
     "build": "vite build && electron-builder --win nsis"
   },
   "build": {
     "appId": "com.glac.mastercontrol",
     "productName": "GLAC Master Control",
+    "npmRebuild": false,
     "win": {
       "target": "nsis"
     },
     "directories": {
-      "output": "dist"
+      "output": "dist-installer"
     },
     "files": [
       "dist/**/*",
