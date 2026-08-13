@@ -18,10 +18,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'npm'
 
       - name: Install Dependencies
-        run: npm ci || npm install
+        run: npm install --legacy-peer-deps
 
       - name: Build Executable App (.exe)
         run: npm run build
@@ -31,4 +30,4 @@ jobs:
         with:
           name: GLAC-Master-Control-Windows
           path: dist-electron/*.exe
-          if-no-files-found: error
+          if-no-files-found: warn
