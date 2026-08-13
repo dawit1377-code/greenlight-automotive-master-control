@@ -18,16 +18,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
+          cache: 'npm'
 
       - name: Install Dependencies
-        run: npm install
+        run: npm ci || npm install
 
-      - name: Build Desktop Executable (.exe)
+      - name: Build Executable App (.exe)
         run: npm run build
 
-      - name: Upload Installer Executable
+      - name: Upload Executable Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: GLAC-Master-Control-Setup
+          name: GLAC-Master-Control-Windows
           path: dist-electron/*.exe
-          if-no-files-found: warn
+          if-no-files-found: error
