@@ -1,681 +1,342 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
+
+// --- INLINE SVG ICON COMPONENTS (Zero External Dependencies) ---
+const IconDashboard = () => (
+  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+  </svg>
+);
+
+const IconDollar = () => (
+  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V6m0 0V4m0 2e12 8m0 0v2m0 0v2m0-6h-1m1 0h1m-1 10h-1m1 0h1" />
+  </svg>
+);
+
+const IconMarketing = () => (
+  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+  </svg>
+);
+
+const IconTenders = () => (
+  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+  </svg>
+);
+
+const IconService = () => (
+  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" />
+  </svg>
+);
+
+const IconPrinter = () => (
+  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+  </svg>
+);
+
+const IconPlus = () => (
+  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+  </svg>
+);
+
+// --- INITIAL MOCK DATA ---
+const INITIAL_SALES = [
+  { id: 'INV-2026-081', client: 'Commercial Bank Fleet', scope: 'Fleet Maintenance', type: 'Credit', amount: 8574291, date: '2026-08-01', status: 'Pending' },
+  { id: 'INV-2026-082', client: 'Abebe T. (Private)', scope: 'Engine Overhaul', type: 'Cash', amount: 150000, date: '2026-08-10', status: 'Completed' },
+  { id: 'INV-2026-083', client: 'Ethio Telecom Logistics', scope: 'Transmission Service', type: 'Credit', amount: 2856472, date: '2026-08-11', status: 'Pending' },
+  { id: 'INV-2026-084', client: 'Mulugeta T.', scope: 'Brake Replacement & Alignment', type: 'Cash', amount: 95000, date: '2026-08-12', status: 'Completed' },
+];
+
+const INITIAL_SERVICE_LOGS = [
+  { plate: 'AA-2-34812', model: 'Toyota Hilux 2023', owner: 'Greenlight Corporate Fleet', lastService: '2026-07-15', nextDueKm: '125,000 km', status: 'Due Soon' },
+  { plate: 'AA-3-98211', model: 'Isuzu NPR Truck', owner: 'Heineken Breweries Dispatch', lastService: '2026-06-10', nextDueKm: '80,000 km', status: 'Overdue' },
+  { plate: 'AA-2-11002', model: 'Nissan Patrol', owner: 'Private Client', lastService: '2026-08-05', nextDueKm: '45,000 km', status: 'Up to Date' },
+];
 
 export default function App() {
-  // Navigation State
-  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'sales' | 'marketing' | 'tenders' | 'reminders' | 'reports'
-  const [salesFilter, setSalesFilter] = useState('all'); // 'all' | 'cash' | 'credit'
-  const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [salesLedger, setSalesLedger] = useState(INITIAL_SALES);
+  const [serviceLogs, setServiceLogs] = useState(INITIAL_SERVICE_LOGS);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [reportSection, setReportSection] = useState('all');
 
-  // Modals & Forms State
-  const [showAddSaleModal, setShowAddSaleModal] = useState(false);
-  const [showAddReminderModal, setShowAddReminderModal] = useState(false);
-  const [showAddTenderModal, setShowAddTenderModal] = useState(false);
-  const [notificationMsg, setNotificationMsg] = useState(null);
+  // New Record State
+  const [newEntry, setNewEntry] = useState({
+    client: '',
+    scope: '',
+    type: 'Cash',
+    amount: '',
+    status: 'Completed'
+  });
 
-  // --- DATA STATES ---
-  const [salesRecords, setSalesRecords] = useState([
-    { id: 101, invoiceNo: 'INV-2026-081', customer: 'Commercial Bank Fleet', amount: 8574291, type: 'Credit', service: 'Fleet Maintenance', date: '2026-08-01', status: 'Pending' },
-    { id: 102, invoiceNo: 'INV-2026-082', customer: 'Abebe T. (Private)', amount: 150000, type: 'Cash', service: 'Engine Overhaul', date: '2026-08-10', status: 'Completed' },
-    { id: 103, invoiceNo: 'INV-2026-083', customer: 'Ethio Telecom Logistics', amount: 2856472, type: 'Credit', service: 'Transmission Service', date: '2026-08-11', status: 'Pending' },
-    { id: 104, invoiceNo: 'INV-2026-084', customer: 'Mulugeta T.', amount: 95000, type: 'Cash', service: 'Brake Replacement & Alignment', date: '2026-08-12', status: 'Completed' }
-  ]);
+  const totalSales = salesLedger.reduce((acc, curr) => acc + curr.amount, 0);
+  const cashSales = salesLedger.filter(s => s.type === 'Cash').reduce((acc, curr) => acc + curr.amount, 0);
+  const creditSales = salesLedger.filter(s => s.type === 'Credit').reduce((acc, curr) => acc + curr.amount, 0);
 
-  const [serviceReminders, setServiceReminders] = useState([
-    { id: 1, plate: '3-A1234', customer: 'Mulugeta T.', vehicle: 'Toyota Hilux 2022', currentKm: '59,800', targetKm: '60,000 km', dueDate: '2026-08-18', status: 'Due Soon', phone: '+251911223344' },
-    { id: 2, plate: '3-B9876', customer: 'Commercial Bank Fleet', vehicle: 'Isuzu NPR Truck', currentKm: '121,500', targetKm: '120,000 km', dueDate: '2026-08-05', status: 'Overdue', phone: '+251911889900' },
-    { id: 3, plate: '3-C4567', customer: 'Selam Bus Line', vehicle: 'Yutong Bus', currentKm: '198,000', targetKm: '200,000 km', dueDate: '2026-08-25', status: 'Scheduled', phone: '+251922334455' }
-  ]);
-
-  const [tenders, setTenders] = useState([
-    { id: 1, refNo: 'TND-2026-004', client: 'Ministry of Transport', title: 'Annual Fleet General Overhaul', cpoAmount: '450,000 ETB', bank: 'Awash Bank CPO', deadline: '2026-08-28', status: 'Active Bid' },
-    { id: 2, refNo: 'TND-2026-002', client: 'Ethiopian Electric Utility', title: 'Heavy Duty Truck Spare Parts Supply', cpoAmount: '1,200,000 ETB', bank: 'CBE CPO', deadline: '2026-08-15', status: 'Under Review' },
-    { id: 3, refNo: 'TND-2026-001', client: 'United Nations Fleet', title: 'Preventive Maintenance SLA 2026/27', cpoAmount: '300,000 ETB', bank: 'Dashen Bank CPO', deadline: '2026-07-30', status: 'Awarded' }
-  ]);
-
-  const [feedbacks, setFeedbacks] = useState([
-    { id: 1, customer: 'Dawit S.', rating: 5, category: 'Positive', comment: 'Fast diagnosis on suspension issues. Excellent service team.', date: '2026-08-09' },
-    { id: 2, customer: 'Kebede A.', rating: 4, category: 'Positive', comment: 'Good quality workmanship, though wait time was slightly long.', date: '2026-08-07' },
-    { id: 3, customer: 'Yonas M.', rating: 2, category: 'Critical', comment: 'Spare part delivery took 3 days extra. Needs faster turnaround.', date: '2026-08-02' }
-  ]);
-
-  // Forms Input State
-  const [newSale, setNewSale] = useState({ customer: '', invoiceNo: '', amount: '', type: 'Cash', service: 'General Maintenance' });
-  const [newReminder, setNewReminder] = useState({ plate: '', customer: '', vehicle: '', targetKm: '', dueDate: '', phone: '' });
-  const [newTender, setNewTender] = useState({ refNo: '', client: '', title: '', cpoAmount: '', bank: '', deadline: '' });
-
-  // Notifications Helper
-  const triggerToast = (msg) => {
-    setNotificationMsg(msg);
-    setTimeout(() => setNotificationMsg(null), 4000);
-  };
-
-  // --- HANDLERS ---
-  const handleAddSale = (e) => {
+  const handleAddEntry = (e) => {
     e.preventDefault();
-    if (!newSale.customer || !newSale.amount) return;
-    const record = {
-      ...newSale,
-      id: Date.now(),
-      invoiceNo: newSale.invoiceNo || `INV-2026-${Math.floor(100 + Math.random() * 900)}`,
-      amount: Number(newSale.amount),
+    if (!newEntry.client || !newEntry.amount) return;
+
+    const entry = {
+      id: `INV-2026-0${salesLedger.length + 85}`,
+      client: newEntry.client,
+      scope: newEntry.scope || 'General Maintenance & Inspection',
+      type: newEntry.type,
+      amount: parseFloat(newEntry.amount),
       date: new Date().toISOString().split('T')[0],
-      status: newSale.type === 'Cash' ? 'Completed' : 'Pending'
+      status: newEntry.status
     };
-    setSalesRecords([record, ...salesRecords]);
-    setNewSale({ customer: '', invoiceNo: '', amount: '', type: 'Cash', service: 'General Maintenance' });
-    setShowAddSaleModal(false);
-    triggerToast('New sale record successfully created!');
+
+    setSalesLedger([entry, ...salesLedger]);
+    setNewEntry({ client: '', scope: '', type: 'Cash', amount: '', status: 'Completed' });
+    setIsModalOpen(false);
   };
 
-  const handleAddReminder = (e) => {
-    e.preventDefault();
-    if (!newReminder.plate || !newReminder.customer) return;
-    const reminder = {
-      ...newReminder,
-      id: Date.now(),
-      currentKm: 'N/A',
-      status: 'Due Soon'
-    };
-    setServiceReminders([reminder, ...serviceReminders]);
-    setNewReminder({ plate: '', customer: '', vehicle: '', targetKm: '', dueDate: '', phone: '' });
-    setShowAddReminderModal(false);
-    triggerToast('Service reminder scheduled successfully!');
+  const triggerPrintReport = () => {
+    window.print();
   };
-
-  const handleAddTender = (e) => {
-    e.preventDefault();
-    if (!newTender.title || !newTender.client) return;
-    const tender = {
-      ...newTender,
-      id: Date.now(),
-      refNo: newTender.refNo || `TND-2026-${Math.floor(100 + Math.random() * 900)}`,
-      status: 'Active Bid'
-    };
-    setTenders([tender, ...tenders]);
-    setNewTender({ refNo: '', client: '', title: '', cpoAmount: '', bank: '', deadline: '' });
-    setShowAddTenderModal(false);
-    triggerToast('New Tender/CPO record registered!');
-  };
-
-  const handleSendReminderSMS = (plate, customer, phone) => {
-    triggerToast(`Automated Service Alert sent to ${customer} (${plate}) via SMS/WhatsApp!`);
-  };
-
-  // --- COMPUTED METRICS ---
-  const totalCashSales = useMemo(() => {
-    return salesRecords.filter(s => s.type === 'Cash').reduce((acc, curr) => acc + curr.amount, 0);
-  }, [salesRecords]);
-
-  const totalCreditSales = useMemo(() => {
-    return salesRecords.filter(s => s.type === 'Credit').reduce((acc, curr) => acc + curr.amount, 0);
-  }, [salesRecords]);
-
-  const totalMonthlySales = useMemo(() => {
-    return totalCashSales + totalCreditSales;
-  }, [totalCashSales, totalCreditSales]);
-
-  // Global Search Filter
-  const filteredSalesRecords = useMemo(() => {
-    return salesRecords.filter(s => {
-      const matchesType = salesFilter === 'all' || s.type.toLowerCase() === salesFilter;
-      const matchesSearch = s.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            s.invoiceNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            s.service.toLowerCase().includes(searchTerm.toLowerCase());
-      return matchesType && matchesSearch;
-    });
-  }, [salesRecords, salesFilter, searchTerm]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 font-sans antialiased">
+    <div className="flex h-screen bg-[#0B0F17] text-slate-100 font-sans overflow-hidden">
       
-      {/* TOAST NOTIFICATION */}
-      {notificationMsg && (
-        <div className="fixed bottom-5 right-5 z-50 bg-green-500 text-slate-950 px-5 py-3 rounded-xl font-bold shadow-2xl flex items-center gap-3 animate-bounce">
-          <span>✅</span>
-          <span>{notificationMsg}</span>
-        </div>
-      )}
-
-      {/* --- TOP BRANDED NAVIGATION HEADER --- */}
-      <header className="bg-slate-900 border-b border-slate-800 px-6 py-4 flex flex-wrap justify-between items-center sticky top-0 z-40 shadow-xl">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-400 to-green-700 flex items-center justify-center font-extrabold text-slate-950 text-xl shadow-lg shadow-green-900/30">
-            GL
-          </div>
-          <div>
-            <h1 className="text-xl font-extrabold text-white tracking-wide">Greenlight Automotive Center</h1>
-            <p className="text-xs text-green-400 font-semibold tracking-wider">Sales & Marketing Master Control Platform</p>
-          </div>
-        </div>
-
-        {/* TOP MODULE NAV TABS */}
-        <nav className="flex flex-wrap gap-1.5 my-3 lg:my-0 bg-slate-950/60 p-1.5 rounded-xl border border-slate-800">
-          <button 
-            onClick={() => setActiveTab('overview')}
-            className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all duration-200 flex items-center gap-1.5 ${activeTab === 'overview' ? 'bg-green-600 text-white shadow-md shadow-green-900/40' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'}`}
-          >
-            📊 Dashboard
-          </button>
-          <button 
-            onClick={() => { setActiveTab('sales'); setSalesFilter('all'); }}
-            className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all duration-200 flex items-center gap-1.5 ${activeTab === 'sales' ? 'bg-green-600 text-white shadow-md shadow-green-900/40' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'}`}
-          >
-            💰 Sales Module
-          </button>
-          <button 
-            onClick={() => setActiveTab('marketing')}
-            className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all duration-200 flex items-center gap-1.5 ${activeTab === 'marketing' ? 'bg-green-600 text-white shadow-md shadow-green-900/40' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'}`}
-          >
-            📢 Marketing
-          </button>
-          <button 
-            onClick={() => setActiveTab('tenders')}
-            className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all duration-200 flex items-center gap-1.5 ${activeTab === 'tenders' ? 'bg-green-600 text-white shadow-md shadow-green-900/40' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'}`}
-          >
-            📄 B2B & Tenders
-          </button>
-          <button 
-            onClick={() => setActiveTab('reminders')}
-            className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all duration-200 flex items-center gap-1.5 ${activeTab === 'reminders' ? 'bg-green-600 text-white shadow-md shadow-green-900/40' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'}`}
-          >
-            🚗 Service Reminders
-          </button>
-          <button 
-            onClick={() => setActiveTab('reports')}
-            className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all duration-200 flex items-center gap-1.5 ${activeTab === 'reports' ? 'bg-green-600 text-white shadow-md shadow-green-900/40' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'}`}
-          >
-            📈 Executive Reports
-          </button>
-        </nav>
-
-        {/* SEARCH ENGINE */}
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <div className="relative w-full sm:w-64">
-            <input 
-              type="text" 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search Plate #, Invoice, Client..." 
-              className="w-full bg-slate-950 text-xs px-3.5 py-2 pl-8 rounded-lg border border-slate-800 focus:outline-none focus:border-green-500 text-slate-200 placeholder-slate-500"
-            />
-            <span className="absolute left-2.5 top-2 text-xs text-slate-500">🔍</span>
-          </div>
-          {searchTerm && (
-            <button onClick={() => setSearchTerm('')} className="text-xs text-slate-400 hover:text-white bg-slate-800 px-2 py-1.5 rounded">Clear</button>
-          )}
-        </div>
-      </header>
-
-      {/* --- MAIN SYSTEM BODY --- */}
-      <main className="flex-1 p-6 max-w-7xl w-full mx-auto space-y-8">
-
-        {/* ========================================================================= */}
-        {/* TAB 1: MASTER DASHBOARD OVERVIEW                                          */}
-        {/* ========================================================================= */}
-        {activeTab === 'overview' && (
-          <div className="space-y-8 animate-fadeIn">
-            
-            {/* Header Banner */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-800 pb-4 gap-4">
-              <div>
-                <h2 className="text-2xl font-black text-white tracking-tight">Executive Dashboard Overview</h2>
-                <p className="text-xs text-slate-400">Real-time telemetry across revenue, credit limits, customer reputation, and service pipelines.</p>
-              </div>
-              <div className="flex gap-2">
-                <button 
-                  onClick={() => setShowAddSaleModal(true)}
-                  className="bg-green-600 hover:bg-green-500 text-slate-950 text-xs px-4 py-2.5 rounded-xl font-extrabold transition shadow-lg shadow-green-900/30 flex items-center gap-1.5"
-                >
-                  ➕ Record New Sale
-                </button>
-                <button 
-                  onClick={() => setShowAddReminderModal(true)}
-                  className="bg-slate-800 hover:bg-slate-700 text-white text-xs px-4 py-2.5 rounded-xl font-bold transition border border-slate-700"
-                >
-                  🚙 Schedule Service
-                </button>
-              </div>
+      {/* SIDEBAR NAVIGATION */}
+      <aside className="w-64 bg-[#111827] border-r border-slate-800 flex flex-col justify-between print:hidden">
+        <div>
+          {/* BRANDING HEADER WITH TRAFFIC LIGHT LOGO */}
+          <div className="p-5 border-b border-slate-800 flex items-center space-x-3">
+            <div className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-700 flex flex-col items-center justify-center p-1 shadow-md">
+              <div className="w-2 h-2 rounded-full bg-slate-600 mb-0.5"></div>
+              <div className="w-2 h-2 rounded-full bg-slate-600 mb-0.5"></div>
+              <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#10b981]"></div>
             </div>
-
-            {/* SECTION 1: FINANCIAL METRICS CARDS */}
             <div>
-              <div className="flex justify-between items-center mb-3">
-                <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                  Sales & Revenue Metrics
-                </h3>
-                <button onClick={() => { setActiveTab('sales'); setSalesFilter('all'); }} className="text-xs text-green-400 hover:underline font-semibold">
-                  Open Sales Control Module →
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                
-                {/* Total Monthly Sales */}
-                <div className="bg-slate-900/90 border border-slate-800 p-6 rounded-2xl relative overflow-hidden group hover:border-slate-700 transition">
-                  <div className="absolute top-0 right-0 w-24 h-24 bg-green-500/5 rounded-full blur-2xl group-hover:bg-green-500/10 transition"></div>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Combined Sales</span>
-                      <p className="text-3xl font-black text-green-400 mt-2">{totalMonthlySales.toLocaleString()} ETB</p>
-                      <p className="text-[11px] text-slate-500 mt-1">Calculated from all ledger postings</p>
-                    </div>
-                    <span className="p-3 bg-green-950 border border-green-800 text-green-400 rounded-xl text-xl">💰</span>
-                  </div>
-                  <div className="mt-4 pt-3 border-t border-slate-800/80 flex justify-between items-center">
-                    <span className="text-xs text-slate-400">Total Entries: {salesRecords.length}</span>
-                    <button onClick={() => setShowAddSaleModal(true)} className="text-xs font-bold text-green-400 hover:text-green-300">+ Add Entry</button>
-                  </div>
-                </div>
-
-                {/* Total Cash Sales */}
-                <div className="bg-slate-900/90 border border-slate-800 p-6 rounded-2xl relative overflow-hidden group hover:border-slate-700 transition">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Cash Receipts</span>
-                      <p className="text-3xl font-black text-white mt-2">{totalCashSales.toLocaleString()} ETB</p>
-                      <p className="text-[11px] text-slate-500 mt-1">Direct completed settlement</p>
-                    </div>
-                    <span className="p-3 bg-slate-800 text-slate-300 rounded-xl text-xl">💵</span>
-                  </div>
-                  <div className="mt-4 pt-3 border-t border-slate-800/80 flex justify-between items-center">
-                    <span className="text-xs text-slate-400">Cash Flow Ratio: {((totalCashSales / (totalMonthlySales || 1)) * 100).toFixed(1)}%</span>
-                    <button onClick={() => { setActiveTab('sales'); setSalesFilter('cash'); }} className="text-xs font-bold text-slate-300 hover:text-white">View Cash</button>
-                  </div>
-                </div>
-
-                {/* Total Credit Sales */}
-                <div className="bg-slate-900/90 border border-slate-800 border-l-4 border-l-red-500 p-6 rounded-2xl relative overflow-hidden group hover:border-slate-700 transition">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Outstanding Credit Ledger</span>
-                      <p className="text-3xl font-black text-red-400 mt-2">{totalCreditSales.toLocaleString()} ETB</p>
-                      <p className="text-[11px] text-slate-500 mt-1">Pending B2B & corporate invoices</p>
-                    </div>
-                    <span className="p-3 bg-red-950 border border-red-900 text-red-400 rounded-xl text-xl">⚠️</span>
-                  </div>
-                  <div className="mt-4 pt-3 border-t border-slate-800/80 flex justify-between items-center">
-                    <span className="text-xs text-red-400 font-semibold">Requires Collection Follow-up</span>
-                    <button onClick={() => { setActiveTab('sales'); setSalesFilter('credit'); }} className="text-xs font-bold text-red-400 hover:underline">Manage Credit</button>
-                  </div>
-                </div>
-
-              </div>
+              <h1 className="font-black tracking-tight text-white leading-none text-base">
+                GREEN LIGHT
+              </h1>
+              <p className="text-[9px] text-emerald-400 font-semibold tracking-wider uppercase mt-1">
+                Automotive Center
+              </p>
             </div>
-
-            {/* SECTION 2: CUSTOMER REPUTATION & TENDERS SUMMARY */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-              
-              {/* Customer Feedback Metrics */}
-              <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-4">
-                <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-                  <h3 className="text-sm font-bold text-white flex items-center gap-2">👥 Customer Reputation</h3>
-                  <button onClick={() => setActiveTab('marketing')} className="text-xs text-green-400 hover:underline">Marketing Center →</button>
-                </div>
-                <div className="grid grid-cols-3 gap-2 text-center">
-                  <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
-                    <span className="text-[10px] text-slate-400 uppercase font-bold block">Total Clients</span>
-                    <span className="text-xl font-black text-white mt-1 block">872</span>
-                  </div>
-                  <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
-                    <span className="text-[10px] text-green-400 uppercase font-bold block">Positive</span>
-                    <span className="text-xl font-black text-green-400 mt-1 block">49</span>
-                  </div>
-                  <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
-                    <span className="text-[10px] text-amber-400 uppercase font-bold block">Critical</span>
-                    <span className="text-xl font-black text-amber-400 mt-1 block">1</span>
-                  </div>
-                </div>
-                <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800 text-xs space-y-2">
-                  <p className="font-bold text-slate-300">Latest Review snippet:</p>
-                  <p className="text-slate-400 italic">"{feedbacks[0].comment}"</p>
-                  <span className="text-[10px] text-green-400 font-semibold block">— {feedbacks[0].customer} ({feedbacks[0].rating} ★)</span>
-                </div>
-              </div>
-
-              {/* Active Contracts & Tenders */}
-              <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-4 lg:col-span-2">
-                <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-                  <h3 className="text-sm font-bold text-white flex items-center gap-2">📄 Active B2B Tenders & Guarantees</h3>
-                  <button onClick={() => setActiveTab('tenders')} className="text-xs text-green-400 hover:underline">View All Tenders →</button>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  {tenders.map((t) => (
-                    <div key={t.id} className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-2">
-                      <div className="flex justify-between items-start">
-                        <span className="text-[10px] font-mono text-slate-500">{t.refNo}</span>
-                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${t.status === 'Awarded' ? 'bg-green-950 text-green-400' : 'bg-blue-950 text-blue-400'}`}>{t.status}</span>
-                      </div>
-                      <p className="text-xs font-bold text-white line-clamp-1">{t.title}</p>
-                      <p className="text-[11px] text-slate-400">{t.client}</p>
-                      <p className="text-xs font-bold text-green-400 pt-1 border-t border-slate-900">CPO: {t.cpoAmount}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-            </div>
-
-            {/* SECTION 3: SERVICE REMINDERS SMART TABLE */}
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-5 border-b border-slate-800 pb-4">
-                <div>
-                  <h3 className="text-base font-bold text-white flex items-center gap-2">🚙 Upcoming Vehicle Service Reminders</h3>
-                  <p className="text-xs text-slate-400">Automated odometer tracking & maintenance triggers for individual and fleet vehicles.</p>
-                </div>
-                <button 
-                  onClick={() => setShowAddReminderModal(true)}
-                  className="bg-green-600 hover:bg-green-500 text-slate-950 px-3.5 py-2 rounded-xl text-xs font-extrabold shadow-md transition"
-                >
-                  + Add Reminder
-                </button>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs text-slate-300">
-                  <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] font-bold tracking-wider border-b border-slate-800">
-                    <tr>
-                      <th className="p-3">Plate Number</th>
-                      <th className="p-3">Customer / Organization</th>
-                      <th className="p-3">Vehicle Model</th>
-                      <th className="p-3">Target Odometer</th>
-                      <th className="p-3">Due Date</th>
-                      <th className="p-3">Status</th>
-                      <th className="p-3 text-right">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-800/60">
-                    {serviceReminders.map((r) => (
-                      <tr key={r.id} className="hover:bg-slate-800/40 transition">
-                        <td className="p-3 font-mono font-bold text-white">{r.plate}</td>
-                        <td className="p-3 font-semibold text-slate-200">{r.customer}</td>
-                        <td className="p-3 text-slate-400">{r.vehicle}</td>
-                        <td className="p-3 font-semibold text-green-400">{r.targetKm}</td>
-                        <td className="p-3 text-slate-300">{r.dueDate}</td>
-                        <td className="p-3">
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${r.status === 'Overdue' ? 'bg-red-950/80 text-red-400 border border-red-800' : 'bg-amber-950/80 text-amber-400 border border-amber-800'}`}>
-                            {r.status}
-                          </span>
-                        </td>
-                        <td className="p-3 text-right">
-                          <button 
-                            onClick={() => handleSendReminderSMS(r.plate, r.customer, r.phone)}
-                            className="bg-green-950 hover:bg-green-900 text-green-400 border border-green-800 px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 ml-auto"
-                          >
-                            📱 Dispatch Alert
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
           </div>
-        )}
 
-        {/* ========================================================================= */}
-        {/* TAB 2: SALES MODULE & CREDIT MANAGEMENT                                  */}
-        {/* ========================================================================= */}
-        {activeTab === 'sales' && (
-          <div className="space-y-6 animate-fadeIn">
-            
-            {/* Header */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-800 pb-4 gap-4">
+          <div className="px-5 py-2 bg-emerald-950/40 border-b border-emerald-900/30 text-[10px] text-emerald-300 font-medium tracking-wide">
+            "A BETTER WAY TO GO"
+          </div>
+
+          {/* NAVIGATION MENU */}
+          <nav className="p-3 space-y-1">
+            {[
+              { id: 'dashboard', label: 'Executive Dashboard', icon: IconDashboard },
+              { id: 'sales', label: 'Sales & Credit Ledger', icon: IconDollar },
+              { id: 'marketing', label: 'Digital Reach Control', icon: IconMarketing },
+              { id: 'tenders', label: 'B2B & Fleet Tenders', icon: IconTenders },
+              { id: 'service', label: 'Vehicle Service Logs', icon: IconService },
+              { id: 'reports', label: 'Reports & Analytics', icon: IconPrinter },
+            ].map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-lg text-xs font-semibold transition-all ${
+                    isActive 
+                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shadow-sm' 
+                      : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200'
+                  }`}
+                >
+                  <Icon />
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* SYSTEM STATUS */}
+        <div className="p-4 border-t border-slate-800 bg-[#0F172A]">
+          <div className="flex items-center justify-between text-[11px] text-slate-400">
+            <span className="flex items-center space-x-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+              <span className="font-mono text-slate-300">v2.6 Enterprise</span>
+            </span>
+            <span className="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-emerald-400 font-bold">MASTER</span>
+          </div>
+        </div>
+      </aside>
+
+      {/* MAIN CONTENT AREA */}
+      <main className="flex-1 flex flex-col min-w-0 overflow-hidden bg-[#0B0F17]">
+        
+        {/* TOP BAR */}
+        <header className="h-16 border-b border-slate-800 bg-[#111827]/60 px-6 flex items-center justify-between print:hidden">
+          <div className="w-72">
+            <input 
+              type="text"
+              placeholder="Search Invoice, Client, Plate #..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-[#0B0F17] border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 transition-colors placeholder:text-slate-600"
+            />
+          </div>
+
+          <div className="flex items-center space-x-3">
+            <button 
+              onClick={triggerPrintReport}
+              className="bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs px-3.5 py-2 rounded-lg flex items-center space-x-2 border border-slate-700 transition-all"
+            >
+              <IconPrinter />
+              <span>Print Official Report</span>
+            </button>
+
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs px-4 py-2 rounded-lg flex items-center space-x-2 shadow-lg shadow-emerald-950/40 transition-all"
+            >
+              <IconPlus />
+              <span>Record New Sale</span>
+            </button>
+          </div>
+        </header>
+
+        {/* WORKSPACE & REPORT PRINT VIEW */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-6 print:p-0 print:overflow-visible">
+          
+          {/* PRINT ONLY EXECUTIVE HEADER */}
+          <div className="hidden print:block mb-6 border-b-2 border-emerald-500 pb-4">
+            <div className="flex justify-between items-center">
               <div>
-                <h2 className="text-2xl font-black text-white">💰 Sales Ledger & Credit Control</h2>
-                <p className="text-xs text-slate-400">Track all cash transactions, credit balances, and generate invoice records.</p>
+                <h1 className="text-2xl font-black text-black tracking-wide">GREEN LIGHT AUTOMOTIVE CENTER</h1>
+                <p className="text-xs text-emerald-700 font-bold uppercase">A Better Way To Go — Official Executive Report</p>
+                <p className="text-xs text-slate-500">Addis Ababa, Ethiopia | Date: {new Date().toLocaleDateString()}</p>
               </div>
-              <button 
-                onClick={() => setShowAddSaleModal(true)}
-                className="bg-green-600 hover:bg-green-500 text-slate-950 text-xs px-4 py-2.5 rounded-xl font-extrabold transition shadow-lg shadow-green-900/30"
-              >
-                ➕ Record New Sale
-              </button>
-            </div>
-
-            {/* Filter Tabs & Summary Header */}
-            <div className="flex flex-wrap items-center justify-between gap-4 bg-slate-900 p-4 rounded-2xl border border-slate-800">
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-slate-400 font-bold mr-2">Filter Ledger:</span>
-                <button 
-                  onClick={() => setSalesFilter('all')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${salesFilter === 'all' ? 'bg-green-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'}`}
-                >
-                  All Transactions ({salesRecords.length})
-                </button>
-                <button 
-                  onClick={() => setSalesFilter('cash')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${salesFilter === 'cash' ? 'bg-green-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'}`}
-                >
-                  Cash Only
-                </button>
-                <button 
-                  onClick={() => setSalesFilter('credit')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${salesFilter === 'credit' ? 'bg-red-600 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'}`}
-                >
-                  Credit Ledgers
-                </button>
-              </div>
-
-              <div className="text-xs font-bold text-slate-300">
-                Filtered Total: <span className="text-green-400 font-extrabold">{filteredSalesRecords.reduce((a,b) => a + b.amount, 0).toLocaleString()} ETB</span>
+              <div className="text-right text-xs text-slate-600">
+                <p className="font-bold">Master Control System Output</p>
+                <p>Status: Confidential / Executive Internal</p>
               </div>
             </div>
+          </div>
 
-            {/* Sales Table */}
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+          {/* DASHBOARD TAB */}
+          {(activeTab === 'dashboard' || activeTab === 'reports') && (
+            <div className="space-y-6">
+              {/* KPI CARDS */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="bg-[#111827] border border-slate-800 rounded-xl p-4">
+                  <p className="text-xs text-slate-400 font-medium">Total Gross Revenue</p>
+                  <h3 className="text-xl font-bold text-white mt-1">{totalSales.toLocaleString()} ETB</h3>
+                  <p className="text-[10px] text-emerald-400 mt-1 font-semibold">↑ Combined Receipts & Receivables</p>
+                </div>
+
+                <div className="bg-[#111827] border border-slate-800 rounded-xl p-4">
+                  <p className="text-xs text-slate-400 font-medium">Cash Collected</p>
+                  <h3 className="text-xl font-bold text-emerald-400 mt-1">{cashSales.toLocaleString()} ETB</h3>
+                  <p className="text-[10px] text-slate-500 mt-1">Direct Settlement</p>
+                </div>
+
+                <div className="bg-[#111827] border border-slate-800 rounded-xl p-4">
+                  <p className="text-xs text-slate-400 font-medium">Outstanding Corporate Credit</p>
+                  <h3 className="text-xl font-bold text-amber-400 mt-1">{creditSales.toLocaleString()} ETB</h3>
+                  <p className="text-[10px] text-amber-500/80 mt-1">Pending Invoice Balances</p>
+                </div>
+
+                <div className="bg-[#111827] border border-slate-800 rounded-xl p-4">
+                  <p className="text-xs text-slate-400 font-medium">Active Fleet B2B Contracts</p>
+                  <h3 className="text-xl font-bold text-white mt-1">4 Tenders</h3>
+                  <p className="text-[10px] text-emerald-400 mt-1">Heineken, CBE, Ethio Telecom</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* SALES LEDGER TABLE */}
+          {(activeTab === 'sales' || activeTab === 'dashboard' || activeTab === 'reports') && (
+            <div className="bg-[#111827] border border-slate-800 rounded-xl p-5 print:border-none print:p-0">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-sm font-bold text-slate-200 print:text-black">Sales Ledger & Outstanding Credit Portfolio</h3>
+                <span className="text-xs text-slate-400 font-mono print:hidden">{salesLedger.length} Total Postings</span>
+              </div>
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs text-slate-300">
-                  <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] font-bold tracking-wider border-b border-slate-800">
+                <table className="w-full text-left text-xs text-slate-300 print:text-black">
+                  <thead className="bg-[#0B0F17] text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800 print:bg-slate-200 print:text-black">
                     <tr>
                       <th className="p-3">Invoice #</th>
                       <th className="p-3">Customer / Organization</th>
-                      <th className="p-3">Service / Repair Scope</th>
-                      <th className="p-3">Payment Type</th>
+                      <th className="p-3">Service Scope</th>
+                      <th className="p-3">Payment</th>
                       <th className="p-3">Amount (ETB)</th>
                       <th className="p-3">Date</th>
                       <th className="p-3">Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/60">
-                    {filteredSalesRecords.length > 0 ? (
-                      filteredSalesRecords.map((s) => (
-                        <tr key={s.id} className="hover:bg-slate-800/40 transition">
-                          <td className="p-3 font-mono font-bold text-slate-400">{s.invoiceNo}</td>
-                          <td className="p-3 font-bold text-white">{s.customer}</td>
-                          <td className="p-3 text-slate-300">{s.service}</td>
+                  <tbody className="divide-y divide-slate-800/60 print:divide-slate-300">
+                    {salesLedger
+                      .filter(s => s.client.toLowerCase().includes(searchQuery.toLowerCase()) || s.id.toLowerCase().includes(searchQuery.toLowerCase()))
+                      .map((row) => (
+                        <tr key={row.id} className="hover:bg-slate-800/30 transition-colors">
+                          <td className="p-3 font-mono text-emerald-400 font-bold print:text-black">{row.id}</td>
+                          <td className="p-3 font-semibold text-slate-100 print:text-black">{row.client}</td>
+                          <td className="p-3 text-slate-400 print:text-slate-700">{row.scope}</td>
                           <td className="p-3">
-                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${s.type === 'Cash' ? 'bg-slate-800 text-slate-300' : 'bg-red-950 text-red-400 border border-red-800'}`}>
-                              {s.type}
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                              row.type === 'Cash' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                            }`}>
+                              {row.type}
                             </span>
                           </td>
-                          <td className="p-3 font-black text-green-400 text-sm">{s.amount.toLocaleString()} ETB</td>
-                          <td className="p-3 text-slate-400">{s.date}</td>
+                          <td className="p-3 font-bold text-slate-100 print:text-black">{row.amount.toLocaleString()} ETB</td>
+                          <td className="p-3 text-slate-400 print:text-black">{row.date}</td>
                           <td className="p-3">
-                            <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${s.status === 'Completed' ? 'bg-green-950 text-green-400' : 'bg-amber-950 text-amber-400'}`}>
-                              {s.status}
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${
+                              row.status === 'Completed' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-amber-950 text-amber-400 border border-amber-800'
+                            }`}>
+                              {row.status}
                             </span>
                           </td>
                         </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="7" className="p-8 text-center text-slate-500 italic">No transaction records match your filter criteria.</td>
-                      </tr>
-                    )}
+                      ))}
                   </tbody>
                 </table>
               </div>
             </div>
+          )}
 
-          </div>
-        )}
-
-        {/* ========================================================================= */}
-        {/* TAB 3: MARKETING MODULE                                                  */}
-        {/* ========================================================================= */}
-        {activeTab === 'marketing' && (
-          <div className="space-y-6 animate-fadeIn">
-            <div className="border-b border-slate-800 pb-4">
-              <h2 className="text-2xl font-black text-white">📢 Marketing & Digital Reach Control</h2>
-              <p className="text-xs text-slate-400">Monitor brand performance across social channels, campaigns, and customer feedback metrics.</p>
-            </div>
-
-            {/* Social Reach Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl text-center space-y-2">
-                <span className="text-3xl">🎵</span>
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">TikTok Audience</span>
-                <p className="text-4xl font-black text-white">100,000+</p>
-                <p className="text-[11px] text-green-400 font-semibold">+12% growth this month</p>
-              </div>
-
-              <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl text-center space-y-2">
-                <span className="text-3xl">✈️</span>
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Telegram Community</span>
-                <p className="text-4xl font-black text-blue-400">2,000+</p>
-                <p className="text-[11px] text-slate-400">Active subscriber broadcast</p>
-              </div>
-
-              <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl text-center space-y-2">
-                <span className="text-3xl">📘</span>
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Facebook Page Likes</span>
-                <p className="text-4xl font-black text-indigo-400">10,000+</p>
-                <p className="text-[11px] text-slate-400">Corporate engagement rate 8.4%</p>
-              </div>
-            </div>
-
-            {/* Feedback & Ratings Log */}
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
-              <h3 className="text-base font-bold text-white">💬 Customer Reviews & Feedback Logs</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {feedbacks.map((fb) => (
-                  <div key={fb.id} className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="font-bold text-white text-xs">{fb.customer}</span>
-                      <span className="text-xs font-bold text-amber-400">{'★'.repeat(fb.rating)}</span>
-                    </div>
-                    <p className="text-xs text-slate-300 italic">"{fb.comment}"</p>
-                    <div className="flex justify-between items-center text-[10px] text-slate-500 pt-2 border-t border-slate-900">
-                      <span>{fb.date}</span>
-                      <span className={fb.category === 'Positive' ? 'text-green-400 font-bold' : 'text-amber-400 font-bold'}>{fb.category}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ========================================================================= */}
-        {/* TAB 4: B2B & TENDERS MODULE                                              */}
-        {/* ========================================================================= */}
-        {activeTab === 'tenders' && (
-          <div className="space-y-6 animate-fadeIn">
-            <div className="flex justify-between items-center border-b border-slate-800 pb-4">
-              <div>
-                <h2 className="text-2xl font-black text-white">📄 B2B Contracts, Tenders & CPO Guarantees</h2>
-                <p className="text-xs text-slate-400">Manage corporate tenders, bid security bonds (CPO), and bank guarantees.</p>
-              </div>
-              <button 
-                onClick={() => setShowAddTenderModal(true)}
-                className="bg-green-600 hover:bg-green-500 text-slate-950 text-xs px-4 py-2.5 rounded-xl font-extrabold transition"
-              >
-                ➕ Register Tender / CPO
-              </button>
-            </div>
-
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
-              <table className="w-full text-left text-xs text-slate-300">
-                <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] font-bold tracking-wider border-b border-slate-800">
-                  <tr>
-                    <th className="p-3">Ref Code</th>
-                    <th className="p-3">Procuring Organization</th>
-                    <th className="p-3">Tender Title</th>
-                    <th className="p-3">CPO Amount</th>
-                    <th className="p-3">Issuing Bank</th>
-                    <th className="p-3">Deadline</th>
-                    <th className="p-3">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/60">
-                  {tenders.map((t) => (
-                    <tr key={t.id} className="hover:bg-slate-800/40 transition">
-                      <td className="p-3 font-mono font-bold text-slate-400">{t.refNo}</td>
-                      <td className="p-3 font-bold text-white">{t.client}</td>
-                      <td className="p-3 text-slate-200">{t.title}</td>
-                      <td className="p-3 font-bold text-green-400">{t.cpoAmount}</td>
-                      <td className="p-3 text-slate-400">{t.bank}</td>
-                      <td className="p-3 text-slate-300">{t.deadline}</td>
-                      <td className="p-3">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${t.status === 'Awarded' ? 'bg-green-950 text-green-400' : 'bg-blue-950 text-blue-400'}`}>
-                          {t.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* ========================================================================= */}
-        {/* TAB 5: SERVICE REMINDERS DEDICATED MODULE                                 */}
-        {/* ========================================================================= */}
-        {activeTab === 'reminders' && (
-          <div className="space-y-6 animate-fadeIn">
-            <div className="flex justify-between items-center border-b border-slate-800 pb-4">
-              <div>
-                <h2 className="text-2xl font-black text-white">🚗 Odometer & Service Reminders Engine</h2>
-                <p className="text-xs text-slate-400">Automated service tracking to ensure recurring customer retention.</p>
-              </div>
-              <button 
-                onClick={() => setShowAddReminderModal(true)}
-                className="bg-green-600 hover:bg-green-500 text-slate-950 text-xs px-4 py-2.5 rounded-xl font-extrabold transition"
-              >
-                + Add Service Vehicle
-              </button>
-            </div>
-
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+          {/* SERVICE REMINDERS TAB */}
+          {(activeTab === 'service' || activeTab === 'reports') && (
+            <div className="bg-[#111827] border border-slate-800 rounded-xl p-5 print:border-none print:p-0">
+              <h3 className="text-sm font-bold text-slate-200 mb-4 print:text-black">Vehicle Service Tracking & Fleet Reminders</h3>
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs text-slate-300">
-                  <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] font-bold tracking-wider border-b border-slate-800">
+                <table className="w-full text-left text-xs text-slate-300 print:text-black">
+                  <thead className="bg-[#0B0F17] text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-800 print:bg-slate-200 print:text-black">
                     <tr>
                       <th className="p-3">Plate Number</th>
-                      <th className="p-3">Customer</th>
-                      <th className="p-3">Vehicle Details</th>
-                      <th className="p-3">Phone Contact</th>
-                      <th className="p-3">Target Service KM</th>
-                      <th className="p-3">Due Date</th>
-                      <th className="p-3">Status</th>
-                      <th className="p-3 text-right">Dispatch</th>
+                      <th className="p-3">Vehicle Model</th>
+                      <th className="p-3">Owner / Organization</th>
+                      <th className="p-3">Last Service</th>
+                      <th className="p-3">Next Due Mileage</th>
+                      <th className="p-3">Alert Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/60">
-                    {serviceReminders.map((r) => (
-                      <tr key={r.id} className="hover:bg-slate-800/40 transition">
-                        <td className="p-3 font-mono font-bold text-white">{r.plate}</td>
-                        <td className="p-3 font-semibold text-slate-200">{r.customer}</td>
-                        <td className="p-3 text-slate-400">{r.vehicle}</td>
-                        <td className="p-3 text-slate-300">{r.phone}</td>
-                        <td className="p-3 font-bold text-green-400">{r.targetKm}</td>
-                        <td className="p-3 text-slate-300">{r.dueDate}</td>
+                  <tbody className="divide-y divide-slate-800/60 print:divide-slate-300">
+                    {serviceLogs.map((log, idx) => (
+                      <tr key={idx} className="hover:bg-slate-800/30">
+                        <td className="p-3 font-mono font-bold text-slate-100 print:text-black">{log.plate}</td>
+                        <td className="p-3 text-slate-300 print:text-black">{log.model}</td>
+                        <td className="p-3 text-slate-400 print:text-black">{log.owner}</td>
+                        <td className="p-3 text-slate-400 print:text-black">{log.lastService}</td>
+                        <td className="p-3 font-mono text-emerald-400 font-semibold print:text-black">{log.nextDueKm}</td>
                         <td className="p-3">
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${r.status === 'Overdue' ? 'bg-red-950 text-red-400' : 'bg-amber-950 text-amber-400'}`}>
-                            {r.status}
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                            log.status === 'Overdue' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                            log.status === 'Due Soon' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                          }`}>
+                            {log.status}
                           </span>
-                        </td>
-                        <td className="p-3 text-right">
-                          <button 
-                            onClick={() => handleSendReminderSMS(r.plate, r.customer, r.phone)}
-                            className="bg-green-600 hover:bg-green-500 text-slate-950 px-3 py-1.5 rounded-lg text-xs font-bold transition"
-                          >
-                            Send SMS Alert
-                          </button>
                         </td>
                       </tr>
                     ))}
@@ -683,205 +344,89 @@ export default function App() {
                 </table>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* ========================================================================= */}
-        {/* TAB 6: EXECUTIVE REPORTS & ANALYTICS                                      */}
-        {/* ========================================================================= */}
-        {activeTab === 'reports' && (
-          <div className="space-y-6 animate-fadeIn">
-            <div className="border-b border-slate-800 pb-4">
-              <h2 className="text-2xl font-black text-white">📈 Executive Analytics & Reporting Engine</h2>
-              <p className="text-xs text-slate-400">Generate executive financial digests, credit risk assessments, and marketing ROI summaries.</p>
-            </div>
-
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <div>
-                <h3 className="text-lg font-bold text-white">Greenlight Automotive Executive Monthly Summary</h3>
-                <p className="text-xs text-slate-400 mt-1">Includes Cash vs Credit ratios, active CPO exposure, and upcoming service conversions.</p>
-              </div>
-              <button 
-                onClick={() => triggerToast('Executive Monthly Report generated and saved to your Downloads!')}
-                className="bg-green-600 hover:bg-green-500 text-slate-950 font-extrabold px-5 py-2.5 rounded-xl text-xs transition shadow-lg shadow-green-900/30"
-              >
-                📥 Export PDF Summary
-              </button>
-            </div>
-
-            {/* Analytics Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-3">
-                <h4 className="text-xs font-bold uppercase text-slate-400 tracking-wider">Revenue Composition</h4>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-slate-300">Cash Collections</span>
-                    <span className="font-bold text-green-400">{totalCashSales.toLocaleString()} ETB</span>
-                  </div>
-                  <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden">
-                    <div className="bg-green-500 h-full" style={{ width: `${(totalCashSales / (totalMonthlySales || 1)) * 100}%` }}></div>
-                  </div>
-                </div>
-                <div className="space-y-2 pt-2">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-slate-300">Credit Invoices</span>
-                    <span className="font-bold text-red-400">{totalCreditSales.toLocaleString()} ETB</span>
-                  </div>
-                  <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden">
-                    <div className="bg-red-500 h-full" style={{ width: `${(totalCreditSales / (totalMonthlySales || 1)) * 100}%` }}></div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-3">
-                <h4 className="text-xs font-bold uppercase text-slate-400 tracking-wider">Service Pipeline Efficiency</h4>
-                <div className="flex justify-between items-center text-xs pt-2">
-                  <span className="text-slate-300">Service Reminders Converted</span>
-                  <span className="font-bold text-white">84%</span>
-                </div>
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-slate-300">Average Job Card Value</span>
-                  <span className="font-bold text-white">185,000 ETB</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
+        </div>
       </main>
 
-      {/* --- MODAL DIALOGS --- */}
-
-      {/* 1. RECORD SALE MODAL */}
-      {showAddSaleModal && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 w-full max-w-lg p-6 rounded-2xl shadow-2xl space-y-5">
+      {/* RECORD ENTRY MODAL */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-[#111827] border border-slate-800 rounded-xl w-full max-w-md p-6 shadow-2xl space-y-4">
             <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-              <h3 className="text-base font-bold text-white">➕ Record New Transaction</h3>
-              <button onClick={() => setShowAddSaleModal(false)} className="text-slate-400 hover:text-white text-sm">✕</button>
+              <h3 className="text-sm font-bold text-slate-100">Record New Transaction</h3>
+              <button onClick={() => setIsModalOpen(false)} className="text-slate-500 hover:text-slate-300">✕</button>
             </div>
-            <form onSubmit={handleAddSale} className="space-y-4">
+            
+            <form onSubmit={handleAddEntry} className="space-y-3 text-xs">
               <div>
-                <label className="text-xs text-slate-400 font-semibold block mb-1">Customer / Organization Name</label>
+                <label className="text-slate-400 block mb-1">Customer / Organization Name</label>
                 <input 
-                  type="text" required value={newSale.customer} onChange={(e) => setNewSale({ ...newSale, customer: e.target.value })}
-                  placeholder="e.g. Ethiopian Airlines Fleet" className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white"
+                  type="text" 
+                  required
+                  placeholder="e.g. Commercial Bank Fleet"
+                  value={newEntry.client}
+                  onChange={(e) => setNewEntry({...newEntry, client: e.target.value})}
+                  className="w-full bg-[#0B0F17] border border-slate-800 rounded p-2 text-slate-200 focus:outline-none focus:border-emerald-500"
                 />
               </div>
+
+              <div>
+                <label className="text-slate-400 block mb-1">Scope of Maintenance</label>
+                <input 
+                  type="text" 
+                  placeholder="e.g. Full Fleet Diagnostic & Brake Renewal"
+                  value={newEntry.scope}
+                  onChange={(e) => setNewEntry({...newEntry, scope: e.target.value})}
+                  className="w-full bg-[#0B0F17] border border-slate-800 rounded p-2 text-slate-200 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs text-slate-400 font-semibold block mb-1">Amount (ETB)</label>
-                  <input 
-                    type="number" required value={newSale.amount} onChange={(e) => setNewSale({ ...newSale, amount: e.target.value })}
-                    placeholder="e.g. 250000" className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-slate-400 font-semibold block mb-1">Payment Type</label>
-                  <select value={newSale.type} onChange={(e) => setNewSale({ ...newSale, type: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white">
-                    <option value="Cash">Cash Transaction</option>
-                    <option value="Credit">Credit Ledger</option>
+                  <label className="text-slate-400 block mb-1">Payment Method</label>
+                  <select 
+                    value={newEntry.type}
+                    onChange={(e) => setNewEntry({...newEntry, type: e.target.value})}
+                    className="w-full bg-[#0B0F17] border border-slate-800 rounded p-2 text-slate-200 focus:outline-none focus:border-emerald-500"
+                  >
+                    <option value="Cash">Cash Receipt</option>
+                    <option value="Credit">Credit Invoice</option>
                   </select>
                 </div>
+
+                <div>
+                  <label className="text-slate-400 block mb-1">Amount (ETB)</label>
+                  <input 
+                    type="number" 
+                    required
+                    placeholder="250000"
+                    value={newEntry.amount}
+                    onChange={(e) => setNewEntry({...newEntry, amount: e.target.value})}
+                    className="w-full bg-[#0B0F17] border border-slate-800 rounded p-2 text-slate-200 focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
               </div>
-              <div>
-                <label className="text-xs text-slate-400 font-semibold block mb-1">Service Category / Scope</label>
-                <input 
-                  type="text" value={newSale.service} onChange={(e) => setNewSale({ ...newSale, service: e.target.value })}
-                  placeholder="e.g. Engine Overhaul & Diagnostic" className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white"
-                />
-              </div>
-              <div className="flex gap-2 pt-2">
-                <button type="submit" className="flex-1 bg-green-600 hover:bg-green-500 text-slate-950 font-extrabold p-2.5 rounded-xl text-xs">Save Transaction</button>
-                <button type="button" onClick={() => setShowAddSaleModal(false)} className="bg-slate-800 hover:bg-slate-700 text-slate-300 p-2.5 rounded-xl text-xs">Cancel</button>
+
+              <div className="flex justify-end space-x-2 pt-3 border-t border-slate-800">
+                <button 
+                  type="button" 
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-3.5 py-1.5 rounded bg-slate-800 text-slate-300 hover:bg-slate-700 font-medium"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  className="px-3.5 py-1.5 rounded bg-emerald-500 text-slate-950 font-bold hover:bg-emerald-400"
+                >
+                  Save Entry
+                </button>
               </div>
             </form>
           </div>
         </div>
       )}
-
-      {/* 2. SCHEDULE SERVICE REMINDER MODAL */}
-      {showAddReminderModal && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 w-full max-w-lg p-6 rounded-2xl shadow-2xl space-y-5">
-            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-              <h3 className="text-base font-bold text-white">🚙 Register Vehicle Service Reminder</h3>
-              <button onClick={() => setShowAddReminderModal(false)} className="text-slate-400 hover:text-white text-sm">✕</button>
-            </div>
-            <form onSubmit={handleAddReminder} className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs text-slate-400 font-semibold block mb-1">Plate Number</label>
-                  <input type="text" required value={newReminder.plate} onChange={(e) => setNewReminder({ ...newReminder, plate: e.target.value })} placeholder="3-A9988" className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white" />
-                </div>
-                <div>
-                  <label className="text-xs text-slate-400 font-semibold block mb-1">Customer / Owner</label>
-                  <input type="text" required value={newReminder.customer} onChange={(e) => setNewReminder({ ...newReminder, customer: e.target.value })} placeholder="Client Name" className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white" />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs text-slate-400 font-semibold block mb-1">Target Odometer (KM)</label>
-                  <input type="text" value={newReminder.targetKm} onChange={(e) => setNewReminder({ ...newReminder, targetKm: e.target.value })} placeholder="75,000 km" className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white" />
-                </div>
-                <div>
-                  <label className="text-xs text-slate-400 font-semibold block mb-1">Due Date</label>
-                  <input type="date" value={newReminder.dueDate} onChange={(e) => setNewReminder({ ...newReminder, dueDate: e.target.value })} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white" />
-                </div>
-              </div>
-              <div>
-                <label className="text-xs text-slate-400 font-semibold block mb-1">Phone Number for Alerts</label>
-                <input type="text" value={newReminder.phone} onChange={(e) => setNewReminder({ ...newReminder, phone: e.target.value })} placeholder="+2519..." className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white" />
-              </div>
-              <div className="flex gap-2 pt-2">
-                <button type="submit" className="flex-1 bg-green-600 hover:bg-green-500 text-slate-950 font-extrabold p-2.5 rounded-xl text-xs">Save Reminder</button>
-                <button type="button" onClick={() => setShowAddReminderModal(false)} className="bg-slate-800 hover:bg-slate-700 text-slate-300 p-2.5 rounded-xl text-xs">Cancel</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* 3. TENDER & CPO MODAL */}
-      {showAddTenderModal && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 w-full max-w-lg p-6 rounded-2xl shadow-2xl space-y-5">
-            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-              <h3 className="text-base font-bold text-white">📄 Register B2B Tender / CPO Guarantee</h3>
-              <button onClick={() => setShowAddTenderModal(false)} className="text-slate-400 hover:text-white text-sm">✕</button>
-            </div>
-            <form onSubmit={handleAddTender} className="space-y-3">
-              <div>
-                <label className="text-xs text-slate-400 font-semibold block mb-1">Procuring Client / Ministry</label>
-                <input type="text" required value={newTender.client} onChange={(e) => setNewTender({ ...newTender, client: e.target.value })} placeholder="e.g. Ministry of Innovation" className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white" />
-              </div>
-              <div>
-                <label className="text-xs text-slate-400 font-semibold block mb-1">Tender Title</label>
-                <input type="text" required value={newTender.title} onChange={(e) => setNewTender({ ...newTender, title: e.target.value })} placeholder="Fleet Repair Service Contract" className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white" />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs text-slate-400 font-semibold block mb-1">CPO Amount (ETB)</label>
-                  <input type="text" value={newTender.cpoAmount} onChange={(e) => setNewTender({ ...newTender, cpoAmount: e.target.value })} placeholder="500,000 ETB" className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white" />
-                </div>
-                <div>
-                  <label className="text-xs text-slate-400 font-semibold block mb-1">Issuing Bank</label>
-                  <input type="text" value={newTender.bank} onChange={(e) => setNewTender({ ...newTender, bank: e.target.value })} placeholder="CBE / Awash" className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-white" />
-                </div>
-              </div>
-              <div className="flex gap-2 pt-2">
-                <button type="submit" className="flex-1 bg-green-600 hover:bg-green-500 text-slate-950 font-extrabold p-2.5 rounded-xl text-xs">Save Tender Record</button>
-                <button type="button" onClick={() => setShowAddTenderModal(false)} className="bg-slate-800 hover:bg-slate-700 text-slate-300 p-2.5 rounded-xl text-xs">Cancel</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* --- SYSTEM FOOTER --- */}
-      <footer className="bg-slate-900 border-t border-slate-800 px-6 py-4 text-center text-slate-500 text-xs">
-        Greenlight Automotive Center © 2026 Enterprise Control System — Integrated Sales & Marketing Intelligence
-      </footer>
 
     </div>
   );
