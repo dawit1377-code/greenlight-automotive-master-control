@@ -1,24 +1,5 @@
 import React, { useState } from 'react';
 
-// --- EMBEDDED LOGO COMPONENT ---
-const BrandLogo = () => (
-  <div className="flex items-center space-x-3">
-    <div className="bg-white p-2 rounded-xl shadow-sm border border-slate-200 flex flex-col items-center justify-center w-10 h-10">
-      <div className="w-2 h-2 rounded-full bg-slate-400 mb-0.5"></div>
-      <div className="w-2 h-2 rounded-full bg-slate-400 mb-0.5"></div>
-      <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_6px_#10b981]"></div>
-    </div>
-    <div>
-      <h1 className="font-extrabold text-slate-800 tracking-tight text-base leading-none">
-        GREEN LIGHT
-      </h1>
-      <p className="text-[9px] text-emerald-600 font-bold tracking-wider uppercase mt-0.5">
-        Automotive Center
-      </p>
-    </div>
-  </div>
-);
-
 // --- INITIAL DATA STORE ---
 const INITIAL_SALES = [
   { id: 'INV-2026-081', client: 'Commercial Bank Fleet', scope: 'Fleet Maintenance', type: 'Credit', amount: 8574291, date: '2026-08-01', status: 'Pending' },
@@ -56,7 +37,7 @@ export default function App() {
   const [marketing, setMarketing] = useState(INITIAL_MARKETING);
 
   // Modal State
-  const [modalType, setModalType] = useState(null); // 'sale', 'tender', 'service'
+  const [modalType, setModalType] = useState(null);
   const [formData, setFormData] = useState({});
 
   // Calculations
@@ -64,14 +45,14 @@ export default function App() {
   const cashCollected = sales.filter(s => s.type === 'Cash').reduce((a, c) => a + c.amount, 0);
   const creditOutstanding = sales.filter(s => s.type === 'Credit').reduce((a, c) => a + c.amount, 0);
 
-  // Filter Helper
+  // Search Filter
   const filterByQuery = (item, keys) => {
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return keys.some(k => item[k]?.toString().toLowerCase().includes(q));
   };
 
-  // Entry Handler
+  // Form Submission
   const handleSaveEntry = (e) => {
     e.preventDefault();
     if (modalType === 'sale') {
@@ -126,20 +107,21 @@ export default function App() {
   };
 
   return (
-    <div className="flex h-screen bg-slate-100 text-slate-800 font-sans overflow-hidden">
+    <div className="app-container">
       
       {/* SIDEBAR NAVIGATION */}
-      <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col justify-between print:hidden">
+      <aside className="sidebar">
         <div>
-          <div className="p-5 border-b border-slate-800 bg-slate-950">
-            <BrandLogo />
+          <div className="sidebar-header">
+            <h1 className="brand-title">GREEN LIGHT</h1>
+            <p className="brand-subtitle">Automotive Center</p>
           </div>
 
-          <div className="px-5 py-2.5 bg-emerald-950/40 border-b border-emerald-900/30 text-[10px] text-emerald-400 font-bold tracking-widest uppercase">
+          <div className="tagline-banner">
             "A Better Way To Go"
           </div>
 
-          <nav className="p-3 space-y-1">
+          <nav className="nav-menu">
             {[
               { id: 'dashboard', label: 'Executive Dashboard' },
               { id: 'sales', label: 'Sales & Credit Ledger' },
@@ -151,149 +133,111 @@ export default function App() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`w-full flex items-center justify-between px-4 py-3 rounded-lg text-xs font-bold transition-all ${
-                  activeTab === tab.id
-                    ? 'bg-emerald-500 text-slate-950 shadow-md'
-                    : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
-                }`}
+                className={`nav-btn ${activeTab === tab.id ? 'active' : ''}`}
               >
                 <span>{tab.label}</span>
-                {activeTab === tab.id && <span className="w-1.5 h-1.5 rounded-full bg-slate-950"></span>}
+                {activeTab === tab.id && <span>●</span>}
               </button>
             ))}
           </nav>
         </div>
 
-        <div className="p-4 border-t border-slate-800 bg-slate-950 flex justify-between items-center text-[10px] text-slate-400">
+        <div className="sidebar-footer">
           <span>v2.6 Enterprise</span>
-          <span className="bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-bold">READY TO USE</span>
+          <span className="status-badge">READY TO USE</span>
         </div>
       </aside>
 
-      {/* MAIN CONTENT AREA */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden bg-slate-50">
+      {/* MAIN WRAPPER */}
+      <main className="main-wrapper">
         
         {/* TOP NAVBAR */}
-        <header className="h-16 border-b border-slate-200 bg-white px-6 flex items-center justify-between shadow-sm print:hidden">
-          <div className="w-80">
-            <input 
-              type="text"
-              placeholder="Live Search Across All Data..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all"
-            />
-          </div>
+        <header className="top-navbar">
+          <input 
+            type="text"
+            placeholder="Live Search Across All Data..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="search-input"
+          />
 
-          <div className="flex items-center space-x-3">
-            <button 
-              onClick={() => window.print()}
-              className="bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs px-4 py-2 rounded-lg transition-all"
-            >
+          <div>
+            <button onClick={() => window.print()} className="btn-secondary">
               🖨️ Print / PDF Report
             </button>
-
             <button 
               onClick={() => setModalType(activeTab === 'tenders' ? 'tender' : activeTab === 'service' ? 'service' : 'sale')}
-              className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs px-4 py-2 rounded-lg shadow-md transition-all"
+              className="btn-primary"
             >
               + Record Entry
             </button>
           </div>
         </header>
 
-        {/* WORKSPACE & PRINT OUTPUT */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 print:p-0">
+        {/* WORKSPACE AREA */}
+        <div className="content-area">
           
-          {/* PRINT BRANDED HEADER */}
-          <div className="hidden print:block border-b-2 border-emerald-500 pb-4 mb-6">
-            <div className="flex justify-between items-center">
-              <div>
-                <h1 className="text-2xl font-black text-slate-900 tracking-tight">GREEN LIGHT AUTOMOTIVE CENTER</h1>
-                <p className="text-xs font-bold text-emerald-600 uppercase">A Better Way To Go — Official Executive Report</p>
-                <p className="text-xs text-slate-500 mt-1">Addis Ababa, Ethiopia | Generated: {new Date().toLocaleDateString()}</p>
-              </div>
-              <div className="text-right text-xs text-slate-600">
-                <p className="font-bold">Master Management System Output</p>
-                <p>Status: Confidential Executive Summary</p>
-              </div>
+          {/* KPI METRICS */}
+          <div className="kpi-grid">
+            <div className="kpi-card">
+              <div className="kpi-label">Total Gross Revenue</div>
+              <div className="kpi-value">{totalGross.toLocaleString()} ETB</div>
+              <div className="kpi-subtext">Direct & Receivables Combined</div>
+            </div>
+
+            <div className="kpi-card">
+              <div className="kpi-label">Cash Settled</div>
+              <div className="kpi-value green">{cashCollected.toLocaleString()} ETB</div>
+              <div className="kpi-subtext">Immediate Payments</div>
+            </div>
+
+            <div className="kpi-card">
+              <div className="kpi-label">Outstanding Credit</div>
+              <div className="kpi-value amber">{creditOutstanding.toLocaleString()} ETB</div>
+              <div className="kpi-subtext">Pending Invoices</div>
+            </div>
+
+            <div className="kpi-card">
+              <div className="kpi-label">Active B2B Tenders</div>
+              <div className="kpi-value">{tenders.length} Active Bids</div>
+              <div className="kpi-subtext">Commercial Contracts</div>
             </div>
           </div>
 
-          {/* KPI METRICS SUMMARY */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-              <p className="text-xs text-slate-500 font-semibold uppercase">Total Gross Revenue</p>
-              <h3 className="text-xl font-black text-slate-900 mt-1">{totalGross.toLocaleString()} ETB</h3>
-              <p className="text-[10px] text-emerald-600 font-bold mt-1">↑ Direct & Receivable Combined</p>
-            </div>
-
-            <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-              <p className="text-xs text-slate-500 font-semibold uppercase">Cash Settled</p>
-              <h3 className="text-xl font-black text-emerald-600 mt-1">{cashCollected.toLocaleString()} ETB</h3>
-              <p className="text-[10px] text-slate-500 mt-1">Immediate Payments</p>
-            </div>
-
-            <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-              <p className="text-xs text-slate-500 font-semibold uppercase">Outstanding Corporate Credit</p>
-              <h3 className="text-xl font-black text-amber-600 mt-1">{creditOutstanding.toLocaleString()} ETB</h3>
-              <p className="text-[10px] text-amber-600 font-bold mt-1">Pending Invoices</p>
-            </div>
-
-            <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-              <p className="text-xs text-slate-500 font-semibold uppercase">Active Fleet B2B Tenders</p>
-              <h3 className="text-xl font-black text-slate-900 mt-1">{tenders.length} Active Bids</h3>
-              <p className="text-[10px] text-emerald-600 font-bold mt-1">Commercial B2B Contracts</p>
-            </div>
-          </div>
-
-          {/* VIEW MODULE: SALES & CREDIT LEDGER */}
+          {/* MODULE: SALES LEDGER */}
           {(activeTab === 'dashboard' || activeTab === 'sales' || activeTab === 'reports') && (
-            <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-5 print:border-none print:p-0">
-              <div className="flex justify-between items-center mb-4 print:hidden">
-                <h3 className="text-sm font-extrabold text-slate-800">Sales & Corporate Credit Ledger</h3>
-                <button 
-                  onClick={() => exportToCSV(sales, 'GLAC_Sales_Ledger')}
-                  className="text-xs bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 px-3 py-1.5 rounded font-bold"
-                >
-                  📥 Export CSV
-                </button>
+            <div className="panel-card">
+              <div className="panel-header">
+                <h3 className="panel-title">Sales & Corporate Credit Ledger</h3>
+                <button onClick={() => exportToCSV(sales, 'GLAC_Sales')} className="btn-secondary" style={{padding: '4px 10px', fontSize: '11px'}}>📥 Export CSV</button>
               </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs border-collapse">
+              <div className="table-wrapper">
+                <table className="data-table">
                   <thead>
-                    <tr className="bg-slate-100 text-slate-600 border-b border-slate-200 uppercase text-[10px] font-bold">
-                      <th className="p-3">Invoice #</th>
-                      <th className="p-3">Client / Company</th>
-                      <th className="p-3">Scope of Work</th>
-                      <th className="p-3">Type</th>
-                      <th className="p-3">Amount (ETB)</th>
-                      <th className="p-3">Date</th>
-                      <th className="p-3">Status</th>
+                    <tr>
+                      <th>Invoice #</th>
+                      <th>Client / Company</th>
+                      <th>Scope of Work</th>
+                      <th>Type</th>
+                      <th>Amount (ETB)</th>
+                      <th>Date</th>
+                      <th>Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody>
                     {sales.filter(s => filterByQuery(s, ['id', 'client', 'scope', 'type'])).map(row => (
-                      <tr key={row.id} className="hover:bg-slate-50">
-                        <td className="p-3 font-mono font-bold text-emerald-600">{row.id}</td>
-                        <td className="p-3 font-semibold text-slate-800">{row.client}</td>
-                        <td className="p-3 text-slate-600">{row.scope}</td>
-                        <td className="p-3">
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                            row.type === 'Cash' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
-                          }`}>
+                      <tr key={row.id}>
+                        <td style={{fontFamily: 'monospace', fontWeight: 'bold', color: '#10b981'}}>{row.id}</td>
+                        <td style={{fontWeight: '700'}}>{row.client}</td>
+                        <td>{row.scope}</td>
+                        <td>
+                          <span className={`badge ${row.type === 'Cash' ? 'badge-cash' : 'badge-credit'}`}>
                             {row.type}
                           </span>
                         </td>
-                        <td className="p-3 font-bold text-slate-900">{row.amount.toLocaleString()} ETB</td>
-                        <td className="p-3 text-slate-500">{row.date}</td>
-                        <td className="p-3">
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                            row.status === 'Completed' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'
-                          }`}>
-                            {row.status}
-                          </span>
-                        </td>
+                        <td style={{fontWeight: '800'}}>{row.amount.toLocaleString()} ETB</td>
+                        <td>{row.date}</td>
+                        <td><span className="badge badge-status">{row.status}</span></td>
                       </tr>
                     ))}
                   </tbody>
@@ -302,43 +246,34 @@ export default function App() {
             </div>
           )}
 
-          {/* VIEW MODULE: B2B TENDERS */}
+          {/* MODULE: B2B TENDERS */}
           {(activeTab === 'tenders' || activeTab === 'reports') && (
-            <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-5 print:border-none print:p-0">
-              <div className="flex justify-between items-center mb-4 print:hidden">
-                <h3 className="text-sm font-extrabold text-slate-800">B2B & Fleet Service Tenders</h3>
-                <button 
-                  onClick={() => exportToCSV(tenders, 'GLAC_B2B_Tenders')}
-                  className="text-xs bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 px-3 py-1.5 rounded font-bold"
-                >
-                  📥 Export CSV
-                </button>
+            <div className="panel-card">
+              <div className="panel-header">
+                <h3 className="panel-title">B2B & Fleet Service Tenders</h3>
+                <button onClick={() => exportToCSV(tenders, 'GLAC_Tenders')} className="btn-secondary" style={{padding: '4px 10px', fontSize: '11px'}}>📥 Export CSV</button>
               </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs border-collapse">
+              <div className="table-wrapper">
+                <table className="data-table">
                   <thead>
-                    <tr className="bg-slate-100 text-slate-600 border-b border-slate-200 uppercase text-[10px] font-bold">
-                      <th className="p-3">Tender ID</th>
-                      <th className="p-3">Target Enterprise</th>
-                      <th className="p-3">Contract Scope</th>
-                      <th className="p-3">Estimated Value (ETB)</th>
-                      <th className="p-3">Submission Deadline</th>
-                      <th className="p-3">Status</th>
+                    <tr>
+                      <th>Tender ID</th>
+                      <th>Target Enterprise</th>
+                      <th>Contract Scope</th>
+                      <th>Value (ETB)</th>
+                      <th>Deadline</th>
+                      <th>Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody>
                     {tenders.filter(t => filterByQuery(t, ['id', 'client', 'scope', 'status'])).map(row => (
-                      <tr key={row.id} className="hover:bg-slate-50">
-                        <td className="p-3 font-mono font-bold text-slate-700">{row.id}</td>
-                        <td className="p-3 font-semibold text-slate-800">{row.client}</td>
-                        <td className="p-3 text-slate-600">{row.scope}</td>
-                        <td className="p-3 font-bold text-emerald-600">{row.budget.toLocaleString()} ETB</td>
-                        <td className="p-3 text-slate-500">{row.deadline}</td>
-                        <td className="p-3">
-                          <span className="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded text-[10px] font-bold">
-                            {row.status}
-                          </span>
-                        </td>
+                      <tr key={row.id}>
+                        <td style={{fontFamily: 'monospace', fontWeight: 'bold'}}>{row.id}</td>
+                        <td style={{fontWeight: '700'}}>{row.client}</td>
+                        <td>{row.scope}</td>
+                        <td style={{fontWeight: '800', color: '#10b981'}}>{row.budget.toLocaleString()} ETB</td>
+                        <td>{row.deadline}</td>
+                        <td><span className="badge badge-status">{row.status}</span></td>
                       </tr>
                     ))}
                   </tbody>
@@ -347,62 +282,37 @@ export default function App() {
             </div>
           )}
 
-          {/* VIEW MODULE: VEHICLE SERVICE LOGS */}
+          {/* MODULE: SERVICE LOGS */}
           {(activeTab === 'service' || activeTab === 'reports') && (
-            <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-5 print:border-none print:p-0">
-              <h3 className="text-sm font-extrabold text-slate-800 mb-4">Vehicle Maintenance & Service Logs</h3>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs border-collapse">
+            <div className="panel-card">
+              <div className="panel-header">
+                <h3 className="panel-title">Vehicle Maintenance & Service Logs</h3>
+              </div>
+              <div className="table-wrapper">
+                <table className="data-table">
                   <thead>
-                    <tr className="bg-slate-100 text-slate-600 border-b border-slate-200 uppercase text-[10px] font-bold">
-                      <th className="p-3">Plate #</th>
-                      <th className="p-3">Vehicle Model</th>
-                      <th className="p-3">Owner / Organization</th>
-                      <th className="p-3">Service Provided</th>
-                      <th className="p-3">Last Service</th>
-                      <th className="p-3">Status</th>
+                    <tr>
+                      <th>Plate #</th>
+                      <th>Vehicle Model</th>
+                      <th>Owner / Enterprise</th>
+                      <th>Service Details</th>
+                      <th>Last Service</th>
+                      <th>Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody>
                     {services.filter(s => filterByQuery(s, ['plate', 'model', 'owner', 'service'])).map((row, idx) => (
-                      <tr key={idx} className="hover:bg-slate-50">
-                        <td className="p-3 font-mono font-bold text-slate-900">{row.plate}</td>
-                        <td className="p-3 text-slate-700">{row.model}</td>
-                        <td className="p-3 text-slate-600">{row.owner}</td>
-                        <td className="p-3 text-slate-600">{row.service}</td>
-                        <td className="p-3 text-slate-500">{row.lastService}</td>
-                        <td className="p-3">
-                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                            row.status === 'Overdue' ? 'bg-red-100 text-red-800' :
-                            row.status === 'Due Soon' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
-                          }`}>
-                            {row.status}
-                          </span>
-                        </td>
+                      <tr key={idx}>
+                        <td style={{fontFamily: 'monospace', fontWeight: 'bold'}}>{row.plate}</td>
+                        <td>{row.model}</td>
+                        <td>{row.owner}</td>
+                        <td>{row.service}</td>
+                        <td>{row.lastService}</td>
+                        <td><span className="badge badge-status">{row.status}</span></td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
-              </div>
-            </div>
-          )}
-
-          {/* VIEW MODULE: DIGITAL REACH CONTROL */}
-          {activeTab === 'marketing' && (
-            <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-5">
-              <h3 className="text-sm font-extrabold text-slate-800 mb-4">Digital Marketing & Lead Generation ROI</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {marketing.map((m, idx) => (
-                  <div key={idx} className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-2">
-                    <p className="text-xs font-bold text-emerald-600">{m.channel}</p>
-                    <p className="text-xs font-semibold text-slate-800">{m.campaign}</p>
-                    <div className="flex justify-between text-xs text-slate-600 pt-2 border-t border-slate-200">
-                      <span>Leads: <strong>{m.leads}</strong></span>
-                      <span>Converted: <strong>{m.conversions}</strong></span>
-                      <span className="text-emerald-600 font-bold">{m.roi}</span>
-                    </div>
-                  </div>
-                ))}
               </div>
             </div>
           )}
@@ -410,81 +320,79 @@ export default function App() {
         </div>
       </main>
 
-      {/* MODAL SYSTEM */}
+      {/* RECORD ENTRY MODAL */}
       {modalType && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white border border-slate-200 rounded-xl w-full max-w-md p-6 shadow-2xl space-y-4">
-            <div className="flex justify-between items-center border-b border-slate-200 pb-3">
-              <h3 className="text-sm font-bold text-slate-900 uppercase">
+        <div className="modal-overlay">
+          <div className="modal-card">
+            <div className="modal-header">
+              <h3 style={{fontSize: '14px', fontWeight: '800', textTransform: 'uppercase'}}>
                 {modalType === 'sale' ? 'Record New Transaction' : modalType === 'tender' ? 'Add B2B Tender' : 'Log Vehicle Service'}
               </h3>
-              <button onClick={() => setModalType(null)} className="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+              <button onClick={() => setModalType(null)} style={{background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px'}}>✕</button>
             </div>
 
-            <form onSubmit={handleSaveEntry} className="space-y-3 text-xs">
+            <form onSubmit={handleSaveEntry}>
               {modalType === 'sale' && (
                 <>
-                  <div>
-                    <label className="text-slate-600 block mb-1 font-semibold">Client / Company Name</label>
-                    <input type="text" required placeholder="e.g. Commercial Bank Fleet" className="w-full border border-slate-300 rounded p-2 text-slate-800" onChange={e => setFormData({...formData, client: e.target.value})} />
+                  <div className="form-group">
+                    <label>Client / Company Name</label>
+                    <input type="text" required placeholder="e.g. Commercial Bank Fleet" onChange={e => setFormData({...formData, client: e.target.value})} />
                   </div>
-                  <div>
-                    <label className="text-slate-600 block mb-1 font-semibold">Scope of Work</label>
-                    <input type="text" placeholder="e.g. Engine Overhaul" className="w-full border border-slate-300 rounded p-2 text-slate-800" onChange={e => setFormData({...formData, scope: e.target.value})} />
+                  <div className="form-group">
+                    <label>Scope of Work</label>
+                    <input type="text" placeholder="e.g. Engine Overhaul" onChange={e => setFormData({...formData, scope: e.target.value})} />
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-slate-600 block mb-1 font-semibold">Payment Type</label>
-                      <select className="w-full border border-slate-300 rounded p-2 text-slate-800" onChange={e => setFormData({...formData, type: e.target.value})}>
-                        <option value="Cash">Cash Receipt</option>
-                        <option value="Credit">Credit Invoice</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="text-slate-600 block mb-1 font-semibold font-semibold">Amount (ETB)</label>
-                      <input type="number" required placeholder="150000" className="w-full border border-slate-300 rounded p-2 text-slate-800" onChange={e => setFormData({...formData, amount: e.target.value})} />
-                    </div>
+                  <div className="form-group">
+                    <label>Payment Type</label>
+                    <select onChange={e => setFormData({...formData, type: e.target.value})}>
+                      <option value="Cash">Cash Receipt</option>
+                      <option value="Credit">Credit Invoice</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>Amount (ETB)</label>
+                    <input type="number" required placeholder="150000" onChange={e => setFormData({...formData, amount: e.target.value})} />
                   </div>
                 </>
               )}
 
               {modalType === 'tender' && (
                 <>
-                  <div>
-                    <label className="text-slate-600 block mb-1 font-semibold">Target Company</label>
-                    <input type="text" required placeholder="e.g. Heineken Ethiopia" className="w-full border border-slate-300 rounded p-2 text-slate-800" onChange={e => setFormData({...formData, client: e.target.value})} />
+                  <div className="form-group">
+                    <label>Target Company</label>
+                    <input type="text" required placeholder="e.g. Heineken Ethiopia" onChange={e => setFormData({...formData, client: e.target.value})} />
                   </div>
-                  <div>
-                    <label className="text-slate-600 block mb-1 font-semibold">Tender Scope</label>
-                    <input type="text" placeholder="e.g. Annual Fleet Maintenance" className="w-full border border-slate-300 rounded p-2 text-slate-800" onChange={e => setFormData({...formData, scope: e.target.value})} />
+                  <div className="form-group">
+                    <label>Tender Scope</label>
+                    <input type="text" placeholder="e.g. Annual Fleet Maintenance" onChange={e => setFormData({...formData, scope: e.target.value})} />
                   </div>
-                  <div>
-                    <label className="text-slate-600 block mb-1 font-semibold">Estimated Budget (ETB)</label>
-                    <input type="number" required placeholder="5000000" className="w-full border border-slate-300 rounded p-2 text-slate-800" onChange={e => setFormData({...formData, budget: e.target.value})} />
+                  <div className="form-group">
+                    <label>Estimated Value (ETB)</label>
+                    <input type="number" required placeholder="5000000" onChange={e => setFormData({...formData, budget: e.target.value})} />
                   </div>
                 </>
               )}
 
               {modalType === 'service' && (
                 <>
-                  <div>
-                    <label className="text-slate-600 block mb-1 font-semibold">Plate Number</label>
-                    <input type="text" required placeholder="AA-2-12345" className="w-full border border-slate-300 rounded p-2 text-slate-800" onChange={e => setFormData({...formData, plate: e.target.value})} />
+                  <div className="form-group">
+                    <label>Plate Number</label>
+                    <input type="text" required placeholder="AA-2-12345" onChange={e => setFormData({...formData, plate: e.target.value})} />
                   </div>
-                  <div>
-                    <label className="text-slate-600 block mb-1 font-semibold">Vehicle Model & Owner</label>
-                    <input type="text" placeholder="Toyota Hilux - Enterprise Client" className="w-full border border-slate-300 rounded p-2 text-slate-800" onChange={e => setFormData({...formData, owner: e.target.value})} />
+                  <div className="form-group">
+                    <label>Vehicle Model & Owner</label>
+                    <input type="text" placeholder="Toyota Hilux - Enterprise Client" onChange={e => setFormData({...formData, owner: e.target.value})} />
                   </div>
-                  <div>
-                    <label className="text-slate-600 block mb-1 font-semibold">Service Details</label>
-                    <input type="text" placeholder="Full Synthetic Oil & Filter Service" className="w-full border border-slate-300 rounded p-2 text-slate-800" onChange={e => setFormData({...formData, service: e.target.value})} />
+                  <div className="form-group">
+                    <label>Service Details</label>
+                    <input type="text" placeholder="Full Synthetic Oil & Filter Service" onChange={e => setFormData({...formData, service: e.target.value})} />
                   </div>
                 </>
               )}
 
-              <div className="flex justify-end space-x-2 pt-3 border-t border-slate-200">
-                <button type="button" onClick={() => setModalType(null)} className="px-4 py-2 rounded bg-slate-200 text-slate-700 font-bold">Cancel</button>
-                <button type="submit" className="px-4 py-2 rounded bg-emerald-500 text-slate-950 font-black">Save Record</button>
+              <div className="form-actions">
+                <button type="button" onClick={() => setModalType(null)} className="btn-secondary">Cancel</button>
+                <button type="submit" className="btn-primary">Save Entry</button>
               </div>
             </form>
           </div>
